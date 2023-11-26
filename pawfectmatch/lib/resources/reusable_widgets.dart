@@ -1,7 +1,29 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 
 //REUSABLE CODE GOES HERE TO MINIMIZE CODE DUPLICATION
+
+pickImage(ImageSource src) async {
+  final ImagePicker imgPicker = ImagePicker();
+  XFile? file = await imgPicker.pickImage(source: src);
+  if (file != null) {
+    return await file.readAsBytes();
+  }
+}
+
+Future<String> uploadImgToStorage(
+    String childname, Uint8List file, FirebaseStorage _storage) async {
+  Reference ref = _storage.ref().child(childname);
+  UploadTask uploadTask = ref.putData(file);
+  TaskSnapshot snapshot = await uploadTask;
+  String download = await snapshot.ref.getDownloadURL();
+
+  return download;
+}
 
 Center logoWidget(String imageurl) {
   return Center(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pawfectmatch/screens/home_screen.dart';
 import 'package:pawfectmatch/screens/registration_screen.dart';
 
 class LoginControl {
@@ -10,6 +11,12 @@ class LoginControl {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailCtrl.text,
         password: passwordCtrl.text,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
       );
     } on FirebaseAuthException catch (e) {
       showErrorDialog(context, e.code);

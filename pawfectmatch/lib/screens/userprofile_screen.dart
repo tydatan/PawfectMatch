@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:pawfectmatch/reusables/reusable_widgets.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pawfectmatch/controller/userprofile_control.dart';
+import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pawfectmatch/screens/home_screen.dart';
-import 'package:pawfectmatch/screens/login_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -19,12 +23,37 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   String email = '';
   String firstname = '';
   String lastname = '';
+  String profilePictureUrl = '';
+
+  Uint8List? image;
 
   @override
   void initState() {
     super.initState();
     uid = FirebaseAuth.instance.currentUser!.uid;
     fetchUserData();
+  }
+
+  void selectImage() async {
+    Uint8List img = await pickImage(ImageSource.gallery);
+    setState(() {
+      image = img;
+      saveProfilePic();
+    });
+  }
+
+  Future<void> saveProfilePic() async {
+    try {
+      String profileurl =
+          await uploadImgToStorage(uid, image!, FirebaseStorage.instance);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'profilepicture': profileurl});
+    } catch (e) {
+      // Handle any potential errors here
+      print("Error saving profile picture: $e");
+    }
   }
 
   Future<void> fetchUserData() async {
@@ -38,6 +67,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       email = userSnapshot['email'];
       firstname = userSnapshot['firstname'];
       lastname = userSnapshot['lastname'];
+      profilePictureUrl = userSnapshot['profilepicture'];
 
       // Update the UI with the contact number
       setState(() {});
@@ -223,7 +253,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     // Update the Firebase Authentication password if it has changed
     if (newPassword.isNotEmpty) {
       try {
-        await FirebaseAuth.instance.currentUser!.updatePassword(newPassword);
+        await (FirebaseAuth.instance.currentUser)!.updatePassword(newPassword);
       } catch (e) {
         print('Error updating password: $e');
         // Handle the error (e.g., show an error message to the user)
@@ -281,15 +311,49 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(
                 height: 30,
               ),
-              SizedBox(
-                  width: 170,
-                  height: 170,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Container(
-                      color: Colors.black,
+
+              Stack(
+                children: [
+                  image != null
+                      ? CircleAvatar(
+                          radius: 65,
+                          backgroundImage: MemoryImage(image!),
+                        )
+                      : profilePictureUrl.isNotEmpty
+                          ? CircleAvatar(
+                              radius: 65,
+                              backgroundImage: NetworkImage(profilePictureUrl),
+                            )
+                          : const CircleAvatar(
+                              radius: 65,
+                              backgroundImage: NetworkImage(
+                                  'https://t4.ftcdn.net/jpg/03/46/93/61/360_F_346936114_RaxE6OQogebgAWTalE1myseY1Hbb5qPM.jpg'),
+                            ),
+                  Positioned(
+                    bottom: 10,
+                    left: 90,
+                    child: GestureDetector(
+                      child: SizedBox(
+                          width: 35,
+                          height: 35,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: Container(
+                              color: const Color(0xff0F3E48),
+                              padding: const EdgeInsets.all(2),
+                              child: const Icon(
+                                Icons.mode_edit_outline_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )),
+                      onTap: () {
+                        selectImage();
+                      },
                     ),
-                  )),
+                  )
+                ],
+              ),
               Text(
                 username.isNotEmpty ? username : 'Username',
                 style:
@@ -400,6 +464,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     fontWeight: FontWeight.w600,
                     color: Color(0xff545F71)),
               ),
+              const SizedBox(
+                height: 10,
+              ),
+
               //After dogs, if no dog added yet, then + sign ra ang mu gawas, if naa nay dogs, then get dog from firestore, display picture to circle (if no pic added, just display dog name), then when clicked, redirects to dog profile page where
               const SizedBox(
                 height: 50,
@@ -413,55 +481,4 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       ),
     );
   }
-}
-
-void signUserOut(BuildContext context) {
-  FirebaseAuth.instance.signOut();
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => const LoginScreen(),
-    ),
-  );
-}
-
-Container signOutButton(BuildContext context, Function onTap) {
-  return Container(
-    width: 185,
-    height: 43,
-    margin: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-    child: ElevatedButton(
-        onPressed: () {
-          onTap();
-        },
-        style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.pressed)) {
-                return const Color(0xffFF2C2C).withOpacity(0.8);
-              }
-              return const Color(0xffFF2C2C);
-            }),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40)))),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Sign Out",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 18),
-            ),
-            SizedBox(
-              width: 7,
-            ),
-            Icon(
-              Icons.logout,
-              color: Colors.white,
-            ),
-          ],
-        )),
-  );
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawfectmatch/reusables/reusable_widgets.dart';
+import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:pawfectmatch/controller/registration_control.dart';
 
 class RegistrationScreen extends StatefulWidget {

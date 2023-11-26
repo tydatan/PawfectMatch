@@ -172,6 +172,7 @@ class RegistrationControl {
       'email': email,
       'password': password,
       'contactnumber': contactnumber,
+      'profilepicture': '',
     });
   }
 
