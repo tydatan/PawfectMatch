@@ -35,8 +35,8 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity,
         color: const Color(0xfff1f6f8),
+        width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -45,8 +45,6 @@ class _SplashScreenState extends State<SplashScreen>
               height: 225,
               width: 225,
             ),
-            const SizedBox(height: 20),
-            const Text("Pawfect Match")
           ],
         ),
       ),

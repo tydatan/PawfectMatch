@@ -26,9 +26,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xffc8dcf4),
+          image: DecorationImage(
+            image: AssetImage('assets/img_group_4.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
         width: double.infinity,
         height: double.infinity,
-        color: const Color(0xffc8dcf4),
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 80, 20, 0),

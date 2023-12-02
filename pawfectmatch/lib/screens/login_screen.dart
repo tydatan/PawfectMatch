@@ -22,7 +22,13 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: const Color(0xfff1f6f8),
+        decoration: const BoxDecoration(
+          color: Color(0xffF1F6F8),
+          image: DecorationImage(
+            image: AssetImage('assets/img_group_24.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: SingleChildScrollView(
             child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 100, 20, 0),

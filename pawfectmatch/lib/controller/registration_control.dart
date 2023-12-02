@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:pawfectmatch/screens/home_screen.dart';
+import 'package:pawfectmatch/screens/dogregistration_screen.dart';
 import 'package:pawfectmatch/screens/login_screen.dart';
 
 class RegistrationControl {
@@ -173,6 +173,7 @@ class RegistrationControl {
       'password': password,
       'contactnumber': contactnumber,
       'profilepicture': '',
+      'dog': '',
     });
   }
 
@@ -199,8 +200,10 @@ class RegistrationControl {
           addToDatabase(uid, username, firstname, lastname, email, password,
               contactnumber);
 
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const DogRegistrationScreen()));
         } else {
           showErrorDialog("PWNOMATCH", context);
         }

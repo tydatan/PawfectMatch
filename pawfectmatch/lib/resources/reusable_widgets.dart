@@ -216,3 +216,13 @@ class _ReusablePasswordFieldState extends State<ReusablePasswordField> {
         ));
   }
 }
+
+enum Gender {
+  male,
+  female,
+}
+
+enum Vaccinated {
+  isVaccinated,
+  isNotVaccinated,
+}

@@ -7,6 +7,7 @@ import 'package:pawfectmatch/controller/userprofile_control.dart';
 import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pawfectmatch/screens/dogprofile_screen.dart';
 import 'package:pawfectmatch/screens/home_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -24,8 +25,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   String firstname = '';
   String lastname = '';
   String profilePictureUrl = '';
+  String dogProfilePictureUrl = '';
+  String dogname = '';
+  String doguid = '';
+  String pw = '';
 
   Uint8List? image;
+
+  bool isDogDataLoaded = false;
 
   @override
   void initState() {
@@ -68,9 +75,32 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       firstname = userSnapshot['firstname'];
       lastname = userSnapshot['lastname'];
       profilePictureUrl = userSnapshot['profilepicture'];
+      doguid = userSnapshot['dog'];
+      pw = userSnapshot['password'];
+
+      fetchDogData();
 
       // Update the UI with the contact number
       setState(() {});
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
+  Future<void> fetchDogData() async {
+    try {
+      DocumentSnapshot dogSnapshot =
+          await FirebaseFirestore.instance.collection('dogs').doc(doguid).get();
+
+      // Extract the data from the document snapshot
+      dogname = dogSnapshot['name'];
+      dogProfilePictureUrl = dogSnapshot['profilepicture'];
+
+      setState(() {
+        isDogDataLoaded = true;
+      });
+
+      // Update the UI with the contact number
     } catch (e) {
       print('Error fetching user data: $e');
     }
@@ -93,7 +123,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           child: Container(
             padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
-              color: const Color(0xffFFDD82),
+              color: const Color(0xffc8dcf4),
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: SingleChildScrollView(
@@ -230,18 +260,28 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     // Conditionally add fields to the map only if the corresponding TextEditingController is not null or empty
     if (newUsername.isNotEmpty) {
       updatedFields['username'] = newUsername;
+    } else {
+      updatedFields['username'] = username;
     }
     if (newContactNumber.isNotEmpty) {
       updatedFields['contactnumber'] = newContactNumber;
+    } else {
+      updatedFields['contactnumber'] = contactNumber;
     }
     if (newFirstName.isNotEmpty) {
       updatedFields['firstname'] = newFirstName;
+    } else {
+      updatedFields['firstname'] = firstname;
     }
     if (newLastName.isNotEmpty) {
       updatedFields['lastname'] = newLastName;
+    } else {
+      updatedFields['lastname'] = lastname;
     }
     if (newPassword.isNotEmpty) {
       updatedFields['password'] = newPassword;
+    } else {
+      updatedFields['password'] = pw;
     }
 
     // Update the Firestore document with the new values
@@ -301,9 +341,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
         ),
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white, // Replace with your desired gradient start color
+                Color(
+                    0xffC9DAED), // Replace with your desired gradient end color
+              ],
+            ),
+          ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -311,7 +363,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(
                 height: 30,
               ),
-
               Stack(
                 children: [
                   image != null
@@ -458,7 +509,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 height: 25,
               ),
               const Text(
-                "Dog/s:",
+                "Dog:",
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -467,8 +518,37 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(
                 height: 10,
               ),
-
-              //After dogs, if no dog added yet, then + sign ra ang mu gawas, if naa nay dogs, then get dog from firestore, display picture to circle (if no pic added, just display dog name), then when clicked, redirects to dog profile page where
+              GestureDetector(
+                child: FutureBuilder(
+                  future:
+                      fetchDogData(), // Use FutureBuilder to handle asynchronous operation
+                  builder: (context, snapshot) {
+                    if (isDogDataLoaded) {
+                      // Display dog picture only when data is loaded
+                      return CircleAvatar(
+                        radius: 45,
+                        backgroundImage: NetworkImage(dogProfilePictureUrl),
+                      );
+                    } else {
+                      // Display a placeholder or loading indicator while data is being fetched
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DogProfileScreen(),
+                    ),
+                  );
+                },
+              ),
+              Text(
+                dogname.isNotEmpty ? dogname : 'Dog',
+                style:
+                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+              ),
               const SizedBox(
                 height: 50,
               ),
