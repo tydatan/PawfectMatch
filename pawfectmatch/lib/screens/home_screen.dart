@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pawfectmatch/screens/dogs_screen.dart';
 import 'package:pawfectmatch/screens/matching_screen.dart';
 import 'package:pawfectmatch/screens/userprofile_screen.dart';
 
@@ -11,8 +12,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int myIndex = 0;
-  List<Widget> widgetList = const [
+  List<Widget> widgetList =  [
     MatchingScreen(),
+    //DogsScreen(dog: settings.arguments as Dog),
     Text("CHAT SCREEN"),
     Text("APPOINTMENT SCREEN"),
     UserProfileScreen()
