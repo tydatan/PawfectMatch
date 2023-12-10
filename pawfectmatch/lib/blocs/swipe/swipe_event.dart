@@ -7,15 +7,11 @@ abstract class SwipeEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadDogs extends SwipeEvent{
-  final String dogId;
-
-  LoadDogs({
-    required this.dogId,
-  });
+class LoadDogs extends SwipeEvent {
+  LoadDogs();
 
   @override
-  List<Object?> get props => [dogId];
+  List<Object?> get props => [];
 }
 
 class UpdateHome extends SwipeEvent {

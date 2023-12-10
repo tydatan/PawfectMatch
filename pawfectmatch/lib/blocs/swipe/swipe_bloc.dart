@@ -12,19 +12,18 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
   SwipeBloc({
     required DatabaseRepository databaseRepository,
   })  : _databaseRepository = databaseRepository, 
-        super(SwipeLoading()){
+        super(SwipeLoading()) {
     on<LoadDogs>(_onLoadDogs);
     on<UpdateHome>(_onUpdateHome);
     on<SwipeLeft>(_onSwipeLeft);
     on<SwipeRight>(_onSwipeRight);
-
   }
 
   void _onLoadDogs(
     LoadDogs event,
     Emitter<SwipeState> emit,
   ) {
-    _databaseRepository.getDogs(event.dogId).listen((dogs) {
+    _databaseRepository.getDogs().listen((dogs) {
       print('$dogs');
       add(
         UpdateHome(dogs: dogs),
@@ -74,5 +73,4 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
       }
     }
   }
-  
 }

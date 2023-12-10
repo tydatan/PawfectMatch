@@ -17,7 +17,9 @@ class _MatchingScreenState extends State<MatchingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(
+        automaticallyImplyLeading: false,
+      ),
       backgroundColor: Color(0xffF1F6F8),
       body: BlocBuilder<SwipeBloc, SwipeState>(
         builder: (context, state) {

@@ -41,7 +41,7 @@ class DogsScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.0),
                         image: DecorationImage(
-                          image: NetworkImage(dog.imageUrl),
+                          image: NetworkImage(dog.profilePicture),
                           fit: BoxFit.cover
                           ), 
                         ),
@@ -110,7 +110,7 @@ class DogsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children:[
-                Text('${dog.name}, ${dog.age}', 
+                Text('${dog.name}, ${dog.calculateAge()}', 
                 style:TextStyle(
                       fontSize: 30.0,
                       fontFamily: 'Roboto',
@@ -193,7 +193,8 @@ class DogsScreen extends StatelessWidget {
                           Colors.blueGrey,
                           Colors.black,
                         ])),
-                      child:Text('${dog.vaxStatus}',
+                      child:Text(
+                      dog.isVaccinated ? 'Complete' : 'Incomplete',
                       style:TextStyle(
                       fontSize: 15.0,
                       fontFamily: 'Roboto',

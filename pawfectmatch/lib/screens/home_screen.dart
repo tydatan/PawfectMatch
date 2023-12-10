@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawfectmatch/screens/dogs_screen.dart';
-import 'package:pawfectmatch/screens/matching_screen.dart';
-import 'package:pawfectmatch/screens/userprofile_screen.dart';
+import 'package:pawfectmatch/screens/screens.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,35 +10,42 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int myIndex = 0;
-  List<Widget> widgetList =  [
-    MatchingScreen(),
-    //DogsScreen(dog: settings.arguments as Dog),
-    Text("CHAT SCREEN"),
-    Text("APPOINTMENT SCREEN"),
-    UserProfileScreen()
-  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-          child: widgetList[myIndex],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-            onTap: (index) {
-              setState(() {
-                myIndex = index;
-              });
-            },
-            currentIndex: myIndex,
-            type: BottomNavigationBarType.fixed,
-            items: const [
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.home_rounded), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chats'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.calendar_today), label: 'Appointments'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.account_circle), label: 'Profile'),
-            ]));
+      body: Center(
+        child: _buildCurrentScreen(),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: (index) {
+          setState(() {
+            myIndex = index;
+          });
+        },
+        currentIndex: myIndex,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chats'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Appointments'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrentScreen() {
+    // Instead of returning from widgetList, you can use the Navigator for named routes
+    switch (myIndex) {
+      case 0:
+        return const MatchingScreen();
+      case 1:
+        return const ChatListScreen(); 
+      case 3:
+        return const UserProfileScreen(); // or any other screen for index 3
+      default:
+        return Container(); // or any default widget if needed
+    }
   }
 }

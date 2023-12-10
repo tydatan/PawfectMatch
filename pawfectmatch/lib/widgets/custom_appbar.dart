@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget{
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final bool automaticallyImplyLeading;
+
   const CustomAppBar({
     Key? key,
+    this.automaticallyImplyLeading = true,
   }) : super(key: key);
 
   @override
@@ -20,9 +23,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget{
       actions: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: IconButton(onPressed: (){}, icon: Icon(Icons.sort), color: const Color.fromARGB(255, 56, 56, 56),),
+          child: IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.sort),
+            color: const Color.fromARGB(255, 56, 56, 56),
+          ),
         )
       ],
+      automaticallyImplyLeading: automaticallyImplyLeading,
     );
   }
 

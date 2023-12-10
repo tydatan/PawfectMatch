@@ -8,26 +8,21 @@ class DatabaseRepository extends BaseDatabaseRepository {
 
   @override
   Stream<Dog> getDog(String dogId) {
-    print('Getting dog images from DB');
+    print('Getting dog from DB');
     return _firebaseFirestore
         .collection('dogs')
         .doc(dogId)
         .snapshots()
-        .map((snap) => Dog.fromSnapshot(snap));
+        .map((snap) => Dog.fromJson(snap.data() as Map<String, dynamic>));
   }
 
   @override
-  Stream<List<Dog>> getDogs(
-    String dogId,
-
-  ) {
+  Stream<List<Dog>> getDogs() {
     return _firebaseFirestore
         .collection('dogs')
         .snapshots()
-        .map((snap) {
-      return snap.docs.map((doc) => Dog.fromSnapshot(doc)).toList();
-    });
+        .map((snap) => snap.docs
+            .map((doc) => Dog.fromJson(doc.data() as Map<String, dynamic>))
+            .toList());
   }
-  
-
 }
