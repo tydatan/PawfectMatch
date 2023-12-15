@@ -1,6 +1,7 @@
+// swipe_state.dart
 part of 'swipe_bloc.dart';
 
-abstract class SwipeState extends Equatable{
+abstract class SwipeState extends Equatable {
   const SwipeState();
 
   @override

@@ -12,29 +12,48 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
   SwipeBloc({
     required DatabaseRepository databaseRepository,
   })  : _databaseRepository = databaseRepository, 
-        super(SwipeLoading()) {
+        super(SwipeLoading()){
     on<LoadDogs>(_onLoadDogs);
     on<UpdateHome>(_onUpdateHome);
     on<SwipeLeft>(_onSwipeLeft);
     on<SwipeRight>(_onSwipeRight);
+
   }
 
-  void _onLoadDogs(
-    LoadDogs event,
-    Emitter<SwipeState> emit,
-  ) {
-    _databaseRepository.getDogs().listen((dogs) {
-      print('$dogs');
-      add(
-        UpdateHome(dogs: dogs),
-      );
-    });
+//   void _onLoadDogs(
+//   LoadDogs event,
+//   Emitter<SwipeState> emit,
+// ) {
+//   print('i am going insane LOAD DOGS');
+//   _databaseRepository.getDogs().listen(
+//     (dogs) {
+//       emit(SwipeLoaded(dogs: dogs));
+//     },
+//     onError: (error) {
+//       emit(SwipeError());
+//     },
+//   );
+// }
+
+void _onLoadDogs( // bold
+  LoadDogs event,
+  Emitter<SwipeState> emit,
+) async {
+  emit(SwipeLoading()); // Emit SwipeLoading state before loading dogs
+  try {
+    final dogs = await _databaseRepository.getDogs().first; // Using first() to get the first result of the stream
+    emit(SwipeLoaded(dogs: dogs));
+  } catch (error) {
+    emit(SwipeError());
   }
+}
+
 
   void _onUpdateHome(
     UpdateHome event,
     Emitter<SwipeState> emit,
   ) {
+    print('i am going insane UPDATE HOME');
     if (event.dogs != null) {
       emit(SwipeLoaded(dogs: event.dogs!));
     } else {
@@ -73,4 +92,5 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
       }
     }
   }
+  
 }

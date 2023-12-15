@@ -10,6 +10,7 @@ import 'package:pawfectmatch/models/models.dart';
 import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:pawfectmatch/screens/home_screen.dart';
 import 'package:pawfectmatch/screens/userprofile_screen.dart';
+import 'package:pawfectmatch/repositories/repositories.dart';
 
 class DogProfileScreen extends StatefulWidget {
   const DogProfileScreen({super.key});
@@ -34,6 +35,9 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
   var formatter = DateFormat('yyyy-MM-dd');
   Vaccinated? selectedVaxStatus;
   bool isBirthdayChanged = false;
+
+  DatabaseRepository databaseRepository = DatabaseRepository();
+
 
   void selectImage() async {
     Uint8List img = await pickImage(ImageSource.gallery);
@@ -78,6 +82,9 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
 
       // Use the Dog.fromJson method to create an instance of Dog from the JSON data
       Dog dog = Dog.fromJson(dogSnapshot.data() as Map<String, dynamic>);
+
+     // Set the gender of the logged-in dog
+    databaseRepository.setLoggedInDogGender(dog.isMale);
 
       // Extract the data from the document snapshot
       dogname = dog.name;
