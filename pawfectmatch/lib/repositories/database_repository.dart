@@ -20,13 +20,12 @@ class DatabaseRepository extends BaseDatabaseRepository {
   Stream<List<Dog>> getDogs() {
     try {
       // Query the "dogs" collection
-      print('this is working');
       return _firebaseFirestore
           .collection('dogs')
           .snapshots()
           .map((snap) => snap.docs
               .map((doc) => Dog.fromJson(doc.data() as Map<String, dynamic>))
-              .where((dog) => dog.isMale != loggedInDogIsMale) // Filter dogs by gender
+              //.where((dog) => dog.isMale != loggedInDogIsMale) // Filter dogs by gender
               .toList());
     } catch (error) {
       print('Error getting dogs: $error');

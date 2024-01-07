@@ -169,7 +169,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
           }
           if (state is SwipeError) {
             return Center(
-              child: Text('There aren\'t any more users.',
+              child: Text('There aren\'t any more dogs.',
                   style: Theme.of(context).textTheme.headline4),
             );
           } else {

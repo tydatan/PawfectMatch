@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           ),
           //home: const SplashScreen(),
           routes: {
-            '/': (context) => const HomeScreen(),
+            '/': (context) => const SplashScreen(),
             //'/dogs': (context) => const DogsScreen(dog: this.settings.argument as Dog),
             '/chats': (context) => const ChatListScreen(),
             //'/appointments': (context) => const AppointmentsScreen(), // Replace with the actual screen
