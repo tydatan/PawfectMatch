@@ -84,7 +84,6 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
       Dog dog = Dog.fromJson(dogSnapshot.data() as Map<String, dynamic>);
 
      // Set the gender of the logged-in dog
-    databaseRepository.setLoggedInDogGender(dog.isMale);
 
       // Extract the data from the document snapshot
       dogname = dog.name;

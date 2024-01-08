@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pawfectmatch/blocs/swipe/swipe_bloc.dart';
 import 'package:pawfectmatch/firebase_service.dart';
 import 'package:pawfectmatch/models/dog_model.dart';
+import 'package:pawfectmatch/repositories/database_repository.dart';
 
 import 'package:pawfectmatch/widgets/widgets.dart';
 
@@ -20,6 +21,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
   void initState() {
     super.initState();
     context.read<SwipeBloc>()..add(LoadDogs());
+    
   }
   //List<Dog> dogs = [];
 
@@ -89,6 +91,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
 //     print('You matched with ${matchedDog.name}! Proceed to chat or other actions.');
 //   }
 
+  DatabaseRepository databaseRepository = DatabaseRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +121,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
                             onDragEnd: (drag) {
                 if (drag.offset.dx < 0) {
                   context.read<SwipeBloc>()..add(SwipeLeft(dogs: state.dogs[0]));
+                  print(state.dogs[0].owner);
                   print('Swiped left');
                 } else {
                   context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0]));
@@ -169,8 +173,8 @@ class _MatchingScreenState extends State<MatchingScreen> {
           }
           if (state is SwipeError) {
             return Center(
-              child: Text('There aren\'t any more dogs.',
-                  style: Theme.of(context).textTheme.headline4),
+              child: Text('Oh no, come back for more soon.',
+                  style: Theme.of(context).textTheme.headlineSmall),
             );
           } else {
             return Text('Something went wrong.');

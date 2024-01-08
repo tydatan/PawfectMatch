@@ -6,10 +6,10 @@ class Dog {
   bool isVaccinated;
   String medID;
   String name;
-  String ownerId;
+  String owner;
   String profilePicture;
   double avgRating;
-  //List<String> likedDogs; // New field for storing liked dog IDs
+  List<String> likedDogs; // New field for storing liked dog IDs
 
   Dog({
     required this.bio,
@@ -19,10 +19,10 @@ class Dog {
     required this.isVaccinated,
     required this.medID,
     required this.name,
-    required this.ownerId,
+    required this.owner,
     required this.profilePicture,
     required this.avgRating,
-    //this.likedDogs = const [], // Initialize with an empty list
+    this.likedDogs = const [], // Initialize with an empty list
   });
 
   factory Dog.fromJson(Map<String, dynamic> json) {
@@ -34,10 +34,10 @@ class Dog {
       isVaccinated: json['isVaccinated'] ?? false,
       medID: json['medID'] ?? '',
       name: json['name'] ?? '',
-      ownerId: json['ownerId'] ?? '',
+      owner: json['owner'] ?? '',
       profilePicture: json['profilepicture'] ?? '',
       avgRating: (json['avgRating'] ?? 0).toDouble(),
-      //likedDogs: List<String>.from(json['likedDogs'] ?? []),
+      likedDogs: List<String>.from(json['likedDogs'] ?? []),
     );
   }
 
@@ -50,10 +50,10 @@ class Dog {
       'isVaccinated': isVaccinated,
       'medID': medID,
       'name': name,
-      'ownerId': ownerId,
+      'owner': owner,
       'profilepicture': profilePicture,
       'avgRating': avgRating,
-      //'likedDogs': likedDogs,
+      'likedDogs': likedDogs,
     };
   }
 

@@ -20,33 +20,26 @@ class SwipeBloc extends Bloc<SwipeEvent, SwipeState> {
 
   }
 
-//   void _onLoadDogs(
-//   LoadDogs event,
-//   Emitter<SwipeState> emit,
-// ) {
-//   print('i am going insane LOAD DOGS');
-//   _databaseRepository.getDogs().listen(
-//     (dogs) {
-//       emit(SwipeLoaded(dogs: dogs));
-//     },
-//     onError: (error) {
-//       emit(SwipeError());
-//     },
-//   );
-// }
-
-void _onLoadDogs( // bold
+void _onLoadDogs(
   LoadDogs event,
   Emitter<SwipeState> emit,
 ) async {
-  emit(SwipeLoading()); // Emit SwipeLoading state before loading dogs
   try {
-    final dogs = await _databaseRepository.getDogs().first; // Using first() to get the first result of the stream
+    emit(SwipeLoading()); // Emit SwipeLoading state before loading dogs
+
+    // Fetch dogs from the repository
+    final dogsStream = _databaseRepository.getDogs();
+
+    // Listen to the stream and get the first result
+    final List<Dog> dogs = await dogsStream.first;
+
     emit(SwipeLoaded(dogs: dogs));
   } catch (error) {
+    print('Error loading dogs: $error');
     emit(SwipeError());
   }
 }
+
 
 
   void _onUpdateHome(
