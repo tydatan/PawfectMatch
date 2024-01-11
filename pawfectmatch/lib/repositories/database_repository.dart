@@ -36,6 +36,7 @@ class DatabaseRepository extends BaseDatabaseRepository {
       rethrow;
     }
   }
+  
 
   String loggedInOwner = '';
   String loggedInDogUid = '';
@@ -43,7 +44,6 @@ class DatabaseRepository extends BaseDatabaseRepository {
   void setLoggedInOwner() {
     try {
       loggedInOwner = FirebaseAuth.instance.currentUser!.uid;
-      print('uid has been stored safely');
     } catch (e) {
       // Handle the case where there is no logged-in user
       print('error in getting uid: $e');
@@ -69,16 +69,55 @@ class DatabaseRepository extends BaseDatabaseRepository {
     }
   }
 
-  Future<void> _updateLikedDogsInFirestore(String likedDogOwnerId) async {
+  Future<void> updateLikedDogsInFirestore(String likedDogOwnerId) async {
     try {
-      String loggedInUserId = "owner";
+      String loggedInUserId = loggedInDogUid;
+      print('Liked Dogs Owner: $likedDogOwnerId');
       await FirebaseService().updateLikedDogs(loggedInUserId, [likedDogOwnerId]);
+      
     } catch (e) {
       print('Error updating liked dogs in Firestore: $e');
     }
   }
-
   
+  Future<bool> isDogLiked(String dogOwnerId) async {
+  try {
+    // Get a reference to the 'likedDogs' subcollection for the logged-in dog
+    CollectionReference<Map<String, dynamic>> likedDogsCollection =
+        _firebaseFirestore.collection('dogs').doc(loggedInDogUid).collection('likedDogs');
+
+    // Check if the document exists in 'likedDogs' subcollection
+    return (await likedDogsCollection.doc(dogOwnerId).get()).exists;
+  } catch (error) {
+    print('Error checking liked dogs: $error');
+    return false;
+  }
+}
+
+Future<List<String>> getLikedDogs() async {
+  try {
+    // Get a reference to the 'likedDogs' subcollection for the logged-in dog
+    CollectionReference<Map<String, dynamic>> likedDogsCollection =
+        _firebaseFirestore.collection('dogs').doc(loggedInDogUid).collection('likedDogs');
+
+    // Get all documents in the 'likedDogs' subcollection
+    QuerySnapshot<Map<String, dynamic>> likedDogsSnapshot =
+        await likedDogsCollection.get();
+
+    // Extract the 'owner' field from each document
+    List<String> likedDogOwners = likedDogsSnapshot.docs
+        .map((doc) => doc.data()['owner'] as String)
+        .toList();
+
+    return likedDogOwners;
+  } catch (error) {
+    print('Error getting liked dog owners: $error');
+    return [];
+  }
+}
+
+
+
 }
 
  

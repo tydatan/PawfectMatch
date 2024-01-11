@@ -121,7 +121,6 @@ class _MatchingScreenState extends State<MatchingScreen> {
                             onDragEnd: (drag) {
                 if (drag.offset.dx < 0) {
                   context.read<SwipeBloc>()..add(SwipeLeft(dogs: state.dogs[0]));
-                  print(state.dogs[0].owner);
                   print('Swiped left');
                 } else {
                   context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0]));
@@ -151,7 +150,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
                 InkWell(
                   onTap: () {
                     context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0]));
-                    print('Swiped left');
+                    print('Swiped right');
                   },
                   child: ChoiceButton(
                   width: 70, 

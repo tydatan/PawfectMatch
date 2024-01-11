@@ -31,14 +31,27 @@ void _onLoadDogs(
     final dogsStream = _databaseRepository.getDogs();
 
     // Listen to the stream and get the first result
-    final List<Dog> dogs = await dogsStream.first;
+    final List<Dog> allDogs = await dogsStream.first;
 
-    emit(SwipeLoaded(dogs: dogs));
+    // Fetch liked dogs
+    final List<String> likedDogsOwners = await _databaseRepository.getLikedDogs();
+    
+    print('All Dogs: ${allDogs.map((dog) => dog.owner).toList()}');
+    print('Liked Dogs Owners: $likedDogsOwners');
+
+    // Filter out liked dogs
+    final List<Dog> filteredDogs =
+        allDogs.where((dog) => !likedDogsOwners.contains(dog.owner)).toList();
+
+    print('Filtered Dogs: ${filteredDogs.map((dog) => dog.owner).toList()}');
+
+    emit(SwipeLoaded(dogs: filteredDogs));
   } catch (error) {
     print('Error loading dogs: $error');
     emit(SwipeError());
   }
 }
+
 
 
 
@@ -73,17 +86,29 @@ void _onLoadDogs(
   void _onSwipeRight(
     SwipeRight event,
     Emitter<SwipeState> emit,
-  ) {
+  ) async {
     if (state is SwipeLoaded) {
       final state = this.state as SwipeLoaded;
       List<Dog> dogs = List.from(state.dogs)..remove(event.dogs);
 
       if (dogs.isNotEmpty) {
         emit(SwipeLoaded(dogs: dogs));
+
+        if (dogs.isNotEmpty) {
+        emit(SwipeLoaded(dogs: dogs));
+
+        // Get the owner ID of the swiped dog
+        String likedDogOwnerId = event.dogs.owner;
+        
+
+        // Update the likedDogs collection in Firestore
+        await _databaseRepository.updateLikedDogsInFirestore(likedDogOwnerId);
+
       } else {
         emit(SwipeError());
       }
     }
+  }
   }
   
 }
