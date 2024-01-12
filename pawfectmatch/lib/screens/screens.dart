@@ -9,3 +9,4 @@ export 'registration_screen.dart';
 export 'chat_screen.dart';
 export 'chatlist_screen.dart';
 export 'review_screen.dart';
+export 'map_screen.dart';

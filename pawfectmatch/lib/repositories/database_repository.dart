@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:pawfectmatch/firebase_service.dart';
 import '/models/models.dart';
 import 'repositories.dart';
+
 
 class DatabaseRepository extends BaseDatabaseRepository {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
@@ -53,22 +55,26 @@ class DatabaseRepository extends BaseDatabaseRepository {
   }
 
   Future<void> setLoggedInDog() async {
-    try {
-      DocumentSnapshot userSnapshot =
-          await FirebaseFirestore.instance.collection('users').doc(loggedInOwner).get();
+  try {
+    DocumentSnapshot userSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(loggedInOwner).get();
 
-      // Use the Users.fromJson method to create an instance of Users from the JSON data
-      Users user = Users.fromJson(userSnapshot.data() as Map<String, dynamic>);
-      loggedInDogUid = user.dogId;
+    // Use the Users.fromJson method to create an instance of Users from the JSON data
+    Users user = Users.fromJson(userSnapshot.data() as Map<String, dynamic>);
+    loggedInDogUid = user.dogId;
 
-      // Get the dog using the updated getDog method and print its name
-      await getDog(loggedInDogUid).first.then((dog) {
-        print('Logged in dog name: ${dog.name}');
-      });
-    } catch (e) {
-      print('Setting Logged in Dog Failed: $e');
-    }
+    // Get the dog using the updated getDog method and print its name
+    await getDog(loggedInDogUid).first.then((dog) {
+      print('Logged in dog name: ${dog.name}');
+      
+      // Update the location of the dog in the 'dogs' collection
+      updateDogLocation(loggedInDogUid);
+    });
+  } catch (e) {
+    print('Setting Logged in Dog Failed: $e');
   }
+}
+
 
   Future<void> updateLikedDogsInFirestore(String likedDogOwnerId) async {
     try {
@@ -289,6 +295,23 @@ Future<void> createConversation(String user1Id, String user2Id) async {
     print('Error creating conversation: $e');
   }
 }
+
+Future<void> updateDogLocation(String dogId) async {
+  try {
+    // Get the current user's location
+    Position position = await Geolocator.getCurrentPosition();
+
+    // Update the 'location' field in the 'dogs' collection
+    await _firebaseFirestore.collection('dogs').doc(dogId).update({
+      'location': GeoPoint(position.latitude, position.longitude),
+    });
+
+    print('Dog location updated successfully.');
+  } catch (e) {
+    print('Error updating dog location: $e');
+  }
+}
+
 
 
 }

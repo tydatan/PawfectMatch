@@ -17,7 +17,7 @@ class DogCard extends StatelessWidget{
       child: Padding(
         padding: const EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
         child: SizedBox(
-          height: MediaQuery.of(context).size.height / 1.4,
+          height: MediaQuery.of(context).size.height / 1.45,
           width: MediaQuery.of(context).size.width,
           child: Stack(
             children: [
