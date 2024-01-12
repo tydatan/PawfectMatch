@@ -27,7 +27,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pawfriends Nearby', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+        title: const Text('Pawfriends Nearby', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: GoogleMap(
@@ -89,6 +89,9 @@ class _MapScreenState extends State<MapScreen> {
         // Generate random markers nearby user's location
         randomMarkers = _generateRandomMarkers(userLocation!, 5);
       });
+
+      // Set initialCameraPosition to the user's location
+      mapController.animateCamera(CameraUpdate.newLatLngZoom(userLocation!, 12.0));
 
       print('Current location: $userLocation');
     } catch (e) {
