@@ -86,40 +86,47 @@ void _onLoadDogs(
   }
 
 void _onSwipeRight(
-    SwipeRight event,
-    Emitter<SwipeState> emit,
-  ) async {
-    if (state is SwipeLoaded) {
-      final state = this.state as SwipeLoaded;
-      List<Dog> dogs = List.from(state.dogs)..remove(event.dogs);
+  SwipeRight event,
+  Emitter<SwipeState> emit,
+) async {
+  if (state is SwipeLoaded) {
+    final state = this.state as SwipeLoaded;
+    List<Dog> dogs = List.from(state.dogs)..remove(event.dogs);
 
-      if (dogs.isNotEmpty) {
-        emit(SwipeLoaded(dogs: dogs));
+    if (dogs.isNotEmpty) {
+      emit(SwipeLoaded(dogs: dogs));
 
-        // Get the owner ID of the swiped dog
-        String likedDogOwnerId = event.dogs.owner;
+      // Get the owner ID of the swiped dog
+      String likedDogOwnerId = event.dogs.owner;
 
-        // Update the likedDogs collection in Firestore
-        await _databaseRepository.updateLikedDogsInFirestore(likedDogOwnerId);
+      // Update the likedDogs collection in Firestore
+      await _databaseRepository.updateLikedDogsInFirestore(likedDogOwnerId);
 
-        bool isMatch = await _databaseRepository.checkMatch(likedDogOwnerId);
+      bool isMatch = await _databaseRepository.checkMatch(likedDogOwnerId);
 
-        if (isMatch) {
-          // Update the matches collection in Firestore
-          print('Updating matches collection...');
-          await _databaseRepository.updateMatched(likedDogOwnerId);
-          print('Matches collection updated successfully.');
+      if (isMatch) {
+        // Update the matches collection in Firestore
+        print('Updating matches collection...');
+        await _databaseRepository.updateMatched(likedDogOwnerId);
+        print('Matches collection updated successfully.');
 
-          // Show the matched popup
-          print('Showing matched popup...');
-          _showMatchedPopup(event.context, event.dogs.profilePicture);
-          print('Matched popup displayed.');
-        }
-      } else {
-        emit(SwipeError());
+        // Show the matched popup
+        print('Showing matched popup...');
+        _showMatchedPopup(event.context, event.dogs.profilePicture);
+        print('Matched popup displayed.');
+
+        // Create a conversation
+        String loggedInOwner =  _databaseRepository.loggedInOwner;
+        print('Creating conversation...');
+        await _databaseRepository.createConversation(loggedInOwner, likedDogOwnerId);
+        print('Conversation created successfully.');
       }
+    } else {
+      emit(SwipeError());
     }
   }
+}
+
 
 
 void _showMatchedPopup(BuildContext context, String dogProfilePictureUrl) {

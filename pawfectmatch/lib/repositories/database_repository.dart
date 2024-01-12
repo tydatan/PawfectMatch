@@ -238,6 +238,57 @@ Future<bool> checkMatchExists(String user1, String user2) async {
   }
 }
 
+Future<void> createConversation(String user1Id, String user2Id) async {
+  try {
+    // Check if a conversation already exists in 'user1'
+    QuerySnapshot existingConversations1 = await FirebaseFirestore.instance
+        .collection('conversations')
+        .where('user1', isEqualTo: user1Id)
+        .where('user2', isEqualTo: user2Id)
+        .get();
+
+    QuerySnapshot existingConversations2 = await FirebaseFirestore.instance
+        .collection('conversations')
+        .where('user1', isEqualTo: user2Id)
+        .where('user2', isEqualTo: user1Id)
+        .get();
+
+    if (existingConversations1.docs.isEmpty &&
+        existingConversations2.docs.isEmpty) {
+      // If no conversation exists between the two, create a new conversation
+      DocumentReference conversationRef =
+          FirebaseFirestore.instance.collection('conversations').doc();
+
+      // Create a messages subcollection inside the conversation
+      CollectionReference messagesRef = conversationRef.collection('messages');
+
+      // Add an initial message
+      DocumentReference initialMessageRef = await messagesRef.add({
+        'senderId': user1Id,
+        'receiverId': user2Id,
+        'messageContent': user1Id,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Get the ID of the initial message
+      String initialMessageId = initialMessageRef.id;
+
+      // Add conversation details with the initial message ID as lastMessage
+      await conversationRef.set({
+        'user1': user1Id,
+        'user2': user2Id,
+        'lastMessage': initialMessageId,
+        // Add any other details you want to store about the conversation
+      });
+
+      print('Conversation created successfully.');
+    } else {
+      print('Conversation already exists.');
+    }
+  } catch (e) {
+    print('Error creating conversation: $e');
+  }
+}
 
 
 }

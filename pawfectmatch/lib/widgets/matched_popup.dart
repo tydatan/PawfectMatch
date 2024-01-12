@@ -89,10 +89,10 @@ class _MatchedPopupState extends State<MatchedPopup> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              //_overlayEntry.remove();
-                              //_overlayClosedCompleter.complete();
+                              _overlayEntry.remove();
+                              _overlayClosedCompleter.complete();
                               // Redirect to chatlist_screen.dart
-                              //Navigator.pushNamed(context, '/chat'); // Replace with your chatlist screen route
+                              Navigator.pushNamed(context, '/chats'); // Replace with your chatlist screen route
                             },
                             child: Text('Go To Chat'),
                           ),
