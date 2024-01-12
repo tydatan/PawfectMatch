@@ -23,7 +23,7 @@ class DatabaseRepository extends BaseDatabaseRepository {
       // Query the "dogs" collection
       setLoggedInOwner();
       setLoggedInDog();
-      print(loggedInOwner);
+      
       return _firebaseFirestore
           .collection('dogs')
           .snapshots()
@@ -40,6 +40,7 @@ class DatabaseRepository extends BaseDatabaseRepository {
 
   String loggedInOwner = '';
   String loggedInDogUid = '';
+
 
   void setLoggedInOwner() {
     try {
@@ -80,19 +81,34 @@ class DatabaseRepository extends BaseDatabaseRepository {
     }
   }
   
-  Future<bool> isDogLiked(String dogOwnerId) async {
+Future<bool> isDogLiked(String dogOwnerId, String likedDogOwnerId) async {
   try {
-    // Get a reference to the 'likedDogs' subcollection for the logged-in dog
-    CollectionReference<Map<String, dynamic>> likedDogsCollection =
-        _firebaseFirestore.collection('dogs').doc(loggedInDogUid).collection('likedDogs');
+    // Get the dogOwned by awaiting the result of getDogOwned
+    String? dog1 = await getDogOwned(dogOwnerId);
 
-    // Check if the document exists in 'likedDogs' subcollection
-    return (await likedDogsCollection.doc(dogOwnerId).get()).exists;
+    if (dog1 != null && dog1.isNotEmpty) {
+      CollectionReference<Map<String, dynamic>> likedDogsCollection =
+          _firebaseFirestore.collection('dogs').doc(dog1).collection('likedDogs');
+
+      print('Checking if $likedDogOwnerId is liked by $dog1');
+
+      // Check if the document exists in 'likedDogs' subcollection
+      bool isLiked = (await likedDogsCollection.doc(likedDogOwnerId).get()).exists;
+
+      print('Result: $isLiked');
+
+      return isLiked;
+    } else {
+      // Handle the case where dog1 is null or empty
+      print('DogOwned is null or empty for ownerId: $dogOwnerId');
+      return false;
+    }
   } catch (error) {
     print('Error checking liked dogs: $error');
     return false;
   }
 }
+
 
 Future<List<String>> getLikedDogs() async {
   try {
@@ -113,6 +129,112 @@ Future<List<String>> getLikedDogs() async {
   } catch (error) {
     print('Error getting liked dog owners: $error');
     return [];
+  }
+}
+
+Future<bool> checkMatch(String likedDogOwnerId) async {
+  try {
+    // Get the current user's dog ID
+    setLoggedInOwner();
+    setLoggedInDog();
+
+    // Check if the liked dog has liked the current user's dog
+    bool isMatch = await isDogLiked(likedDogOwnerId, loggedInOwner) && await isDogLiked(loggedInOwner, likedDogOwnerId);
+
+    return isMatch;
+  } catch (error) {
+    print('Error checking match: $error');
+    return false;
+  }
+}
+
+Future<String> getDogOwned(String ownerId) async {
+  try {
+    // Get a reference to the 'user' document
+    DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+        await _firebaseFirestore.collection('users').doc(ownerId).get();
+
+    // Check if the document exists
+    if (userSnapshot.exists) {
+      // Retrieve the 'dog' field from the document
+      String dogOwned = userSnapshot.data()?['dog'];
+      print('got the dog owned: $dogOwned');
+      return dogOwned;
+    } else {
+      print('User document not found for ownerId: $ownerId');
+      return '';
+    }
+  } catch (error) {
+    print('Error getting dogOwned: $error');
+    return '';
+  }
+}
+
+
+Future<void> updateMatchInfo(String dogOwnerId, String matchedDogOwnerId) async {
+  try {
+    // Perform the necessary actions to update match information in Firestore
+    // For example, you can update a 'matches' collection or fields in the 'dogs' collection
+    // Update the 'matches' field in Firestore for the specified dog
+    await _firebaseFirestore
+        .collection('dogs')
+        .doc(dogOwnerId)
+        .update({
+      'matches': FieldValue.arrayUnion([matchedDogOwnerId]),
+    });
+  } catch (error) {
+    print('Error updating match info in Firestore: $error');
+  }
+}
+
+Future<void> updateMatched(String likedDogOwnerId) async {
+  try {
+    // Get the current user's dog ID
+    setLoggedInOwner();
+    setLoggedInDog();
+
+    // Get the dog owned by the liked dog owner
+    String matchedDogOwnerId = likedDogOwnerId;
+
+    if (matchedDogOwnerId.isNotEmpty) {
+      // Check if the match already exists
+      bool matchExists = await checkMatchExists(loggedInOwner, likedDogOwnerId);
+
+      if (!matchExists) {
+        // Update 'matches' collection for user1 (logged-in owner)
+        await _firebaseFirestore.collection('matches').add({
+          'user1': loggedInOwner,
+          'user2': likedDogOwnerId,
+        });
+
+        // Update 'matches' collection for user2 (liked dog owner)
+        await _firebaseFirestore.collection('matches').add({
+          'user1': likedDogOwnerId,
+          'user2': loggedInOwner,
+        });
+      } else {
+        print('Match already exists between $loggedInOwner and $likedDogOwnerId');
+      }
+    } else {
+      print('Matched dog not found for ownerId: $likedDogOwnerId');
+    }
+  } catch (error) {
+    print('Error updating matched info in Firestore: $error');
+  }
+}
+
+Future<bool> checkMatchExists(String user1, String user2) async {
+  try {
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firebaseFirestore
+        .collection('matches')
+        .where('user1', isEqualTo: user1)
+        .where('user2', isEqualTo: user2)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
+  } catch (error) {
+    print('Error checking match existence: $error');
+    return false;
   }
 }
 

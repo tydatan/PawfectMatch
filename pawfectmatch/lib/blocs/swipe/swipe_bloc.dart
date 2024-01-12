@@ -1,7 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:pawfectmatch/models/models.dart';
 import 'package:pawfectmatch/repositories/repositories.dart';
+import 'package:pawfectmatch/widgets/matched_popup.dart';
 
 part 'swipe_event.dart';
 part 'swipe_state.dart';
@@ -83,7 +85,7 @@ void _onLoadDogs(
     }
   }
 
-  void _onSwipeRight(
+void _onSwipeRight(
     SwipeRight event,
     Emitter<SwipeState> emit,
   ) async {
@@ -94,21 +96,40 @@ void _onLoadDogs(
       if (dogs.isNotEmpty) {
         emit(SwipeLoaded(dogs: dogs));
 
-        if (dogs.isNotEmpty) {
-        emit(SwipeLoaded(dogs: dogs));
-
         // Get the owner ID of the swiped dog
         String likedDogOwnerId = event.dogs.owner;
-        
 
         // Update the likedDogs collection in Firestore
         await _databaseRepository.updateLikedDogsInFirestore(likedDogOwnerId);
 
+        bool isMatch = await _databaseRepository.checkMatch(likedDogOwnerId);
+
+        if (isMatch) {
+          // Update the matches collection in Firestore
+          print('Updating matches collection...');
+          await _databaseRepository.updateMatched(likedDogOwnerId);
+          print('Matches collection updated successfully.');
+
+          // Show the matched popup
+          print('Showing matched popup...');
+          _showMatchedPopup(event.context, event.dogs.profilePicture);
+          print('Matched popup displayed.');
+        }
       } else {
         emit(SwipeError());
       }
     }
   }
-  }
+
+
+void _showMatchedPopup(BuildContext context, String dogProfilePictureUrl) {
+  print('Navigating to matched popup screen...');
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => MatchedPopup(dogProfilePictureUrl: dogProfilePictureUrl),
+    ),
+  );
+}
+
   
 }

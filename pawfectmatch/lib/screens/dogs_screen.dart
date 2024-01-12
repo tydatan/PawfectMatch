@@ -81,7 +81,7 @@ class DogsScreen extends StatelessWidget {
                               ),
                               InkWell(
                                 onTap: () {
-                                  context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0]));
+                                  context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0], context: context));
                                   Navigator.pop(context);
                                   print('Swiped Right');
                                 },

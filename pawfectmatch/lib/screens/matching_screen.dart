@@ -23,73 +23,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
     context.read<SwipeBloc>()..add(LoadDogs());
     
   }
-  //List<Dog> dogs = [];
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     // Call the function when the screen is initialized
-//     _loadDogs();
-//   }
-
-//   Future<void> _loadDogs() async {
-//   // Replace 'loggedInDogUid' with the actual UID of the logged-in dog
-//   List<Map<String, dynamic>> dogsData = await FirebaseService().getDogsExcludingLoggedInDog('loggedInDogUid');
-
-//   setState(() {
-//     // Convert JSON data to a list of Dog objects
-//     dogs = dogsData.map((data) => Dog.fromJson(data)).toList();
-//   });
-// }
-
-// void _handleSwipeLeft() {
-//     setState(() {
-//       // Handle logic for swiping left (disliking)
-//       _removeDogFromList();
-//     });
-//   }
-
-//   void _handleSwipeRight() {
-//     setState(() {
-//       // Handle logic for swiping right (liking)
-//       Dog likedDog = dogs.removeAt(0);
-//       likedDogs.add(likedDog);
-
-//       // Add the liked dog's ID to the user's likedDogs list in Firestore
-//       _updateLikedDogsInFirestore(likedDog.id);
-
-//       // Check for matches and handle accordingly
-//       if (_checkForMatch(likedDog)) {
-//         _handleMatch(likedDog);
-//       }
-//     });
-//   }
-
-//   void _removeDogFromList() {
-//     if (dogs.isNotEmpty) {
-//       dogs.removeAt(0);
-//     }
-//   }
-
-//   Future<void> _updateLikedDogsInFirestore(String likedDogId) async {
-//     try {
-      
-//       String loggedInUserId = "doguid"; // Replace with your actual user ID
-//       await FirebaseService().updateLikedDogs(loggedInUserId, [likedDogId]);
-//     } catch (e) {
-//       print('Error updating liked dogs in Firestore: $e');
-//     }
-//   }
-
-//   bool _checkForMatch(Dog likedDog) {
-//     // Check if the liked dog also liked the user
-//     return likedDogs.any((dog) => dog.id == likedDog.id);
-//   }
-
-//   void _handleMatch(Dog matchedDog) {
-//     // Handle logic for a match
-//     print('You matched with ${matchedDog.name}! Proceed to chat or other actions.');
-//   }
 
   DatabaseRepository databaseRepository = DatabaseRepository();
 
@@ -123,7 +57,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
                   context.read<SwipeBloc>()..add(SwipeLeft(dogs: state.dogs[0]));
                   print('Swiped left');
                 } else {
-                  context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0]));
+                  context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0], context: context));
                   print('Swiped right');
                 }
                             },
@@ -149,7 +83,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
                 ),
                 InkWell(
                   onTap: () {
-                    context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0]));
+                    context.read<SwipeBloc>()..add(SwipeRight(dogs: state.dogs[0], context: context));
                     print('Swiped right');
                   },
                   child: ChoiceButton(
