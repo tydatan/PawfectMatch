@@ -28,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chats'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Appointments'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'), // Map icon added
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Schedules'),
           BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
         ],
       ),
@@ -36,16 +37,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCurrentScreen() {
-    // Instead of returning from widgetList, you can use the Navigator for named routes
     switch (myIndex) {
       case 0:
         return const MatchingScreen();
       case 1:
         return const ChatListScreen(); 
-      case 3:
-        return const UserProfileScreen(); // or any other screen for index 3
+      case 2:
+        return MapScreen(); // Add MapScreen
+      case 4:
+        return const UserProfileScreen(); 
       default:
-        return Container(); // or any default widget if needed
+        return Container(); 
     }
   }
 }
