@@ -40,7 +40,7 @@ class DatabaseRepository extends BaseDatabaseRepository {
   }
   
 
-  String loggedInOwner = '';
+  String loggedInOwner = FirebaseAuth.instance.currentUser!.uid;
   String loggedInDogUid = '';
 
 
@@ -312,109 +312,57 @@ Future<void> updateDogLocation(String dogId) async {
   }
 }
 
+Future<GeoPoint?> getLoggedInDogLocation() async {
+  try {
+    // Check if loggedInDogUid is not empty or null
+    if (loggedInDogUid.isNotEmpty) {
+      // Retrieve the logged-in dog's document
+      DocumentSnapshot<Map<String, dynamic>> dogSnapshot =
+          await _firebaseFirestore.collection('dogs').doc(loggedInDogUid).get();
+
+      // Check if the document exists
+      if (dogSnapshot.exists) {
+        // Retrieve the 'location' field from the document
+        GeoPoint? location = dogSnapshot.data()?['location'];
+        print('Got Logged In Dogs Location');
+        return location;
+      } else {
+        print('Dog document not found for ID: $loggedInDogUid');
+        return null;
+      }
+    } else {
+      print('loggedInDogUid is empty or null');
+      return null;
+    }
+  } catch (error) {
+    print('Error getting logged-in dog location: $error');
+    return null;
+  }
+}
+
+  Future<GeoPoint?> getDogLocation(String ownerUid) async {
+  try {
+    // Query the 'dogs' collection based on ownerUid
+    QuerySnapshot<Map<String, dynamic>> dogsSnapshot =
+        await _firebaseFirestore
+            .collection('dogs')
+            .where('owner', isEqualTo: ownerUid)
+            .get();
+
+    // Check if any documents were found
+    if (dogsSnapshot.docs.isNotEmpty) {
+      // Retrieve the first document and its 'location' field
+      GeoPoint? location = dogsSnapshot.docs.first.data()['location'];
+      return location;
+    } else {
+      print('No dog found for owner ID: $ownerUid');
+      return null;
+    }
+  } catch (error) {
+    print('Error getting dog location: $error');
+    return null;
+  }
+}
 
 
 }
-
- 
-
-
-// // Future<List<Map<String, dynamic>>> getMessages(String conversationId) async {
-// //   try {
-// //     // Query the "messages" subcollection of the specified conversation
-// //     QuerySnapshot messagesSnapshot = await FirebaseFirestore.instance
-// //         .collection('conversations')
-// //         .doc(conversationId)
-// //         .collection('messages')
-// //         .orderBy('timestamp',
-// //             descending: false) // You can adjust the ordering as needed
-// //         .get();
-
-// //     // Convert the messages to a list of maps
-// //     List<Map<String, dynamic>> messages = messagesSnapshot.docs.map((doc) {
-// //       return {
-// //         'senderId': doc['senderId'],
-// //         'receiverId': doc['receiverId'],
-// //         'messageContent': doc['messageContent'],
-// //         'timestamp': doc['timestamp'],
-// //       };
-// //     }).toList();
-
-// //     return messages;
-// //   } catch (error) {
-// //     print('Error getting messages: $error');
-// //     rethrow;
-// //   }
-// // }
-
-
-
-// import 'dart:async';
-
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:rxdart/rxdart.dart'; // Import rxdart
-// import '/models/models.dart';
-// import 'repositories.dart';
-// import 'package:pawfectmatch/screens/screens.dart';
-
-// class DatabaseRepository extends BaseDatabaseRepository {
-//   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-  
-//   // StreamController to broadcast changes in loggedInOwner
-//   final _loggedInOwnerController = BehaviorSubject<String>.seeded('');
-
-//   DatabaseRepository() {
-//     // Listen to authentication state changes and update loggedInOwner
-//     FirebaseAuth.instance.authStateChanges().listen((User? user) {
-//       if (user != null) {
-//         loggedInOwner = user.uid;
-//         print('userid stored in database');
-//       } else {
-//         loggedInOwner = ''; // Set to an appropriate default value
-//       }
-//       _loggedInOwnerController.add(loggedInOwner);
-//     });
-//   }
-
-//   // Property to store the gender of the logged-in dog
-//   String loggedInOwner = '';
-
-//   // Stream to listen to changes in loggedInOwner
-//   Stream<String> get loggedInOwnerStream => _loggedInOwnerController.stream;
-
-//   @override
-//   Stream<Dog> getDog(String dogId) {
-//     print('Getting dog from DB');
-//     return _firebaseFirestore
-//         .collection('dogs')
-//         .doc(dogId)
-//         .snapshots()
-//         .map((snap) => Dog.fromJson(snap.data() as Map<String, dynamic>));
-//   }
-
-//   @override
-//   Stream<List<Dog>> getDogs() {
-//     try {
-//       // Combine streams to react to changes in both dogs and loggedInOwner
-//       return Rx.combineLatest2(
-//         _firebaseFirestore.collection('dogs').snapshots(),
-//         loggedInOwnerStream,
-//         (QuerySnapshot<Object?> snap, String loggedInOwner) {
-//           return snap.docs
-//               .map((doc) => Dog.fromJson(doc.data() as Map<String, dynamic>))
-//               .where((dog) => dog.ownerId != loggedInOwner)
-//               .toList();
-//         },
-//       );
-//     } catch (error) {
-//       print('Error getting dogs: $error');
-//       rethrow;
-//     }
-//   }
-
-//   // Close the StreamController when the repository is disposed
-//   void dispose() {
-//     _loggedInOwnerController.close();
-//   }
-// }

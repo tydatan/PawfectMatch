@@ -1,7 +1,11 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pawfectmatch/blocs/swipe/swipe_bloc.dart';
 import 'package:pawfectmatch/models/models.dart';
+import 'package:pawfectmatch/repositories/database_repository.dart';
 import 'package:pawfectmatch/widgets/choice_button.dart';
 
 class DogsScreen extends StatelessWidget {
@@ -19,6 +23,9 @@ class DogsScreen extends StatelessWidget {
   const DogsScreen({
     required this.dog,
   });
+
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -106,26 +113,67 @@ class DogsScreen extends StatelessWidget {
             ),
           ),
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:[
-                Text('${dog.name}, ${dog.calculateAge()}', 
-                style:TextStyle(
-                      fontSize: 30.0,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.black
-                      ),
-                    ),
-                Text('location', 
-                style:TextStyle(
-                      fontSize: 15.0,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.normal, 
-                      color: Colors.black
-                      ),
-                    ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${dog.name}, ${dog.calculateAge()}',
+                  style: TextStyle(
+                    fontSize: 30.0,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                FutureBuilder<GeoPoint?>(
+                  // Use FutureBuilder to asynchronously get the logged-in dog's location
+                  future: DatabaseRepository().getDogLocation(DatabaseRepository().loggedInOwner),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error loading location');
+                    } else if (!snapshot.hasData || snapshot.data == null) {
+                      return Text('Location not available');
+                    } else {
+                      GeoPoint? loggedInDogLocation = snapshot.data;
+
+                      return FutureBuilder<GeoPoint?>(
+                        future: DatabaseRepository().getDogLocation(dog.owner),
+                        builder: (context, otherDogSnapshot) {
+                          if (otherDogSnapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (otherDogSnapshot.hasError) {
+                            return Text('Error loading other dog\'s location');
+                          } else if (!otherDogSnapshot.hasData || otherDogSnapshot.data == null) {
+                            return Text('Other dog\'s location not available');
+                          } else {
+                            GeoPoint? otherDogLocation = otherDogSnapshot.data;
+                            double distance = loggedInDogLocation != null
+                                ? calculateDistance(loggedInDogLocation, otherDogLocation!)
+                                : 0.0;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${distance.toStringAsFixed(2)} km',
+                                  style: TextStyle(
+                                    fontSize: 15.0,
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      );
+                    }
+                  },
+                ),
                 SizedBox(height: 15,),
                 Text('Bio', 
                 style:TextStyle(
@@ -226,4 +274,28 @@ class DogsScreen extends StatelessWidget {
       ),
     );
   }
+
+  double calculateDistance(GeoPoint location1, GeoPoint location2) {
+  const double earthRadius = 6371; // Radius of the earth in kilometers
+
+  // Convert latitude and longitude from degrees to radians
+  double lat1 = location1.latitude * (pi / 180);
+  double lon1 = location1.longitude * (pi / 180);
+  double lat2 = location2.latitude * (pi / 180);
+  double lon2 = location2.longitude * (pi / 180);
+
+  // Calculate the change in coordinates
+  double dLat = lat2 - lat1;
+  double dLon = lon2 - lon1;
+
+  // Haversine formula to calculate distance
+  double a = pow(sin(dLat / 2), 2) +
+      cos(lat1) * cos(lat2) * pow(sin(dLon / 2), 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+  // Calculate the distance in kilometers
+  double distance = earthRadius * c;
+
+  return distance;
+}
 }
