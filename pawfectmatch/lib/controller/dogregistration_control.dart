@@ -54,7 +54,7 @@ class DogRegistrationControl {
       isVaccinated: isVax,
       medID: medID,
       name: name,
-      ownerId: uid,
+      owner: uid,
       profilePicture: '',
       avgRating: 0,
     );

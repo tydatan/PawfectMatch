@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pawfectmatch/controller/chat_control.dart';
+import 'package:pawfectmatch/models/models.dart';
+import 'package:pawfectmatch/screens/appointment_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final String otherDogName;
@@ -122,7 +124,11 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: ElevatedButton.icon(
               onPressed: () {
-                // Add your logic for the "Set Schedule" button here
+                // Navigate to the appointment screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AppointmentScreen()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

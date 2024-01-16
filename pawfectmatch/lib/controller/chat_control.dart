@@ -183,3 +183,17 @@ Stream<QuerySnapshot<Map<String, dynamic>>> messageStream(String convoID) {
       .orderBy('timestamp')
       .snapshots();
 }
+
+Future<void> sendScheduleMessage(String convoID, String senderID, String receiverID, String scheduleDetails) async {
+  try {
+    await FirebaseFirestore.instance.collection('conversations').doc(convoID).collection('messages').add({
+      'senderID': senderID,
+      'receiverID': receiverID,
+      'messageContent': scheduleDetails,
+      'timestamp': FieldValue.serverTimestamp(),
+      // Add any other necessary fields for the schedule message
+    });
+  } catch (error) {
+    print('Error sending schedule message: $error');
+  }
+}

@@ -38,22 +38,41 @@ class FirebaseService {
   }
 
 
-  Future<void> updateLikedDogs(String doguid, List<String> likedDogIds) async {
+  Future<void> updateLikedDogs(String dogUid, List<String> likedDogOwnerIds) async {
   try {
-    // Get the current liked dogs for the user
-    DocumentSnapshot dogSnapshot = await dogsCollection.doc(doguid).get();
-    List<String> currentLikedDogs = List<String>.from(dogSnapshot.get('likedDogs') ?? []);
+    // Get a reference to the 'likedDogs' subcollection for the specified dog
+    CollectionReference<Map<String, dynamic>> likedDogsCollection =
+        dogsCollection.doc(dogUid).collection('likedDogs');
+
+    // Fetch the current liked dogs for the user
+    QuerySnapshot<Map<String, dynamic>> likedDogsSnapshot =
+        await likedDogsCollection.get();
+    List<String> currentLikedDogs =
+        likedDogsSnapshot.docs.map((doc) => doc.id).toList();
 
     // Combine the existing liked dogs with the new ones and remove duplicates
-    List<String> updatedLikedDogs = Set<String>.from([...currentLikedDogs, ...likedDogIds]).toList();
+     List<String> updatedLikedDogs =
+        Set<String>.from([...currentLikedDogs, ...likedDogOwnerIds]).toList();
 
-    // Update the 'likedDogs' field in Firestore
-    await dogsCollection.doc(doguid).update({
-      'likedDogs': updatedLikedDogs,
+    // Clear existing documents in the 'likedDogs' subcollection
+    await likedDogsCollection.get().then(
+      (QuerySnapshot<Map<String, dynamic>> snapshot) {
+        for (QueryDocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs) {
+          doc.reference.delete();
+        }
+      },
+    );
+
+    // Add new documents with empty data to represent liked dogs
+    updatedLikedDogs.forEach((likedDogOwnerId) async {
+      await likedDogsCollection.doc(likedDogOwnerId).set({'owner': likedDogOwnerId});
     });
+
+    print('Liked dogs updated successfully');
   } catch (e) {
     print('Error updating liked dogs in Firestore: $e');
   }
 }
+
 
 }

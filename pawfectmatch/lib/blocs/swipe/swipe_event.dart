@@ -5,6 +5,8 @@ abstract class SwipeEvent extends Equatable {
 
   @override
   List<Object?> get props => [];
+
+  
 }
 
 class LoadDogs extends SwipeEvent {
@@ -36,9 +38,15 @@ class SwipeLeft extends SwipeEvent{
 
 class SwipeRight extends SwipeEvent{
   final Dog dogs;
+  final BuildContext context; // Include BuildContext in the event
 
-  const SwipeRight({required this.dogs});
+  SwipeRight({
+    required this.dogs,
+    required this.context,
+  });
+
 
   @override
   List<Object> get props => [dogs];
 }
+

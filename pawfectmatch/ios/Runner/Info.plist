@@ -45,5 +45,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>io.flutter.embedded_views_preview</key>
+	<string>YES</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Find out if there are other users near you.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Don't miss out on potential matches.</string>
+	<key>io.flutter.plugins.googlemaps.api_key</key>
+	<string>AIzaSyAath__yk2_zoHK3uGcVnVMUS9amNsUJjo</string>
+
+
+
+
+
 </dict>
 </plist>
