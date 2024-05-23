@@ -6,9 +6,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:pawfectmatch/models/models.dart';
 import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:pawfectmatch/screens/home_screen.dart';
 import 'package:pawfectmatch/screens/userprofile_screen.dart';
+import 'package:pawfectmatch/repositories/repositories.dart';
 
 class DogProfileScreen extends StatefulWidget {
   const DogProfileScreen({super.key});
@@ -34,6 +36,9 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
   Vaccinated? selectedVaxStatus;
   bool isBirthdayChanged = false;
 
+  DatabaseRepository databaseRepository = DatabaseRepository();
+
+
   void selectImage() async {
     Uint8List img = await pickImage(ImageSource.gallery);
     setState(() {
@@ -45,10 +50,10 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
   Future<void> saveProfilePic() async {
     try {
       String profileurl =
-          await uploadImgToStorage(uid, image!, FirebaseStorage.instance);
+          await uploadImgToStorage(doguid, image!, FirebaseStorage.instance);
       await FirebaseFirestore.instance
           .collection('dogs')
-          .doc(uid)
+          .doc(doguid)
           .update({'profilepicture': profileurl});
     } catch (e) {
       // Handle any potential errors here
@@ -60,7 +65,10 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
     try {
       DocumentSnapshot userSnapshot =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      doguid = userSnapshot['dog'];
+
+      // Use the Users.fromJson method to create an instance of Users from the JSON data
+      Users user = Users.fromJson(userSnapshot.data() as Map<String, dynamic>);
+      doguid = user.dogId;
       fetchDogData();
     } catch (e) {
       print('Error fetching user data: $e');
@@ -72,15 +80,20 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
       DocumentSnapshot dogSnapshot =
           await FirebaseFirestore.instance.collection('dogs').doc(doguid).get();
 
+      // Use the Dog.fromJson method to create an instance of Dog from the JSON data
+      Dog dog = Dog.fromJson(dogSnapshot.data() as Map<String, dynamic>);
+
+     // Set the gender of the logged-in dog
+
       // Extract the data from the document snapshot
-      dogname = dogSnapshot['name'];
-      profilePictureUrl = dogSnapshot['profilepicture'];
-      bio = dogSnapshot['bio'];
-      birthday = dogSnapshot['birthday'];
-      breed = dogSnapshot['breed'];
-      isMale = dogSnapshot['isMale'];
-      isVaccinated = dogSnapshot['isVaccinated'];
-      medID = dogSnapshot['medID'];
+      dogname = dog.name;
+      profilePictureUrl = dog.profilePicture;
+      bio = dog.bio;
+      birthday = dog.birthday;
+      breed = dog.breed;
+      isMale = dog.isMale;
+      isVaccinated = dog.isVaccinated;
+      medID = dog.medID;
 
       // Update the UI with the contact number
       setState(() {});
@@ -484,16 +497,21 @@ class _DogProfileScreenState extends State<DogProfileScreen> {
               ),
               Stack(
                 children: [
-                  profilePictureUrl.isNotEmpty
+                  image != null
                       ? CircleAvatar(
                           radius: 65,
-                          backgroundImage: NetworkImage(profilePictureUrl),
+                          backgroundImage: MemoryImage(image!),
                         )
-                      : const CircleAvatar(
-                          radius: 65,
-                          backgroundImage: NetworkImage(
-                              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUoJFUtRrXrFtd2LrzEja_cMMlEtreh4CMh1iRrhLL-5RJ4cO7P3Pale5OTxIrgkhFmM8&usqp=CAU'),
-                        ),
+                      : profilePictureUrl.isNotEmpty
+                          ? CircleAvatar(
+                              radius: 65,
+                              backgroundImage: NetworkImage(profilePictureUrl),
+                            )
+                          : const CircleAvatar(
+                              radius: 65,
+                              backgroundImage: NetworkImage(
+                                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUoJFUtRrXrFtd2LrzEja_cMMlEtreh4CMh1iRrhLL-5RJ4cO7P3Pale5OTxIrgkhFmM8&usqp=CAU'),
+                            ),
                   Positioned(
                     bottom: 10,
                     left: 90,

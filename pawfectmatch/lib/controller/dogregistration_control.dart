@@ -4,11 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pawfectmatch/models/models.dart';
 import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:pawfectmatch/screens/home_screen.dart';
 
 class DogRegistrationControl {
-  late DocumentReference dogRef;
+  late DocumentReference<Map<String, dynamic>> dogRef;
   var formatter = DateFormat('yyyy-MM-dd');
 
   Future<void> saveProfilePic(Uint8List? image) async {
@@ -44,17 +45,35 @@ class DogRegistrationControl {
 
     String formattedDate = formatter.format(selectedDate);
 
-    dogRef = await FirebaseFirestore.instance.collection('dogs').add({
-      'name': name,
-      'bio': bio,
-      'isMale': isMale,
-      'breed': breed,
-      'birthday': formattedDate,
-      'medID': medID,
-      'isVaccinated': isVax,
-      'profilepicture': '',
-      'owner': uid,
-    });
+    // Create a Dog instance
+    Dog newDog = Dog(
+      bio: bio,
+      birthday: formattedDate,
+      breed: breed,
+      isMale: isMale,
+      isVaccinated: isVax,
+      medID: medID,
+      name: name,
+      owner: uid,
+      profilePicture: '',
+      avgRating: 0,
+    );
+
+    // dogRef = await FirebaseFirestore.instance.collection('dogs').add({
+    //   'name': name,
+    //   'bio': bio,
+    //   'isMale': isMale,
+    //   'breed': breed,
+    //   'birthday': formattedDate,
+    //   'medID': medID,
+    //   'isVaccinated': isVax,
+    //   'profilepicture': '',
+    //   'owner': uid,
+    // });
+    // Add the dog to the 'dogs' collection
+    dogRef = await FirebaseFirestore.instance
+        .collection('dogs')
+        .add(newDog.toJson());
 
     String dogDocumentId = dogRef.id;
 

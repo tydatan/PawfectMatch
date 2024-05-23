@@ -4,11 +4,14 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pawfectmatch/controller/userprofile_control.dart';
+import 'package:pawfectmatch/models/models.dart';
+
 import 'package:pawfectmatch/resources/reusable_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pawfectmatch/screens/dogprofile_screen.dart';
-import 'package:pawfectmatch/screens/home_screen.dart';
+import 'package:pawfectmatch/screens/screens.dart';
+
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -68,15 +71,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       DocumentSnapshot userSnapshot =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
-      // Extract the data from the document snapshot
-      contactNumber = userSnapshot['contactnumber'];
-      username = userSnapshot['username'];
-      email = userSnapshot['email'];
-      firstname = userSnapshot['firstname'];
-      lastname = userSnapshot['lastname'];
-      profilePictureUrl = userSnapshot['profilepicture'];
-      doguid = userSnapshot['dog'];
-      pw = userSnapshot['password'];
+      // Use the Users.fromJson method to create an instance of Users from the JSON data
+      Users user = Users.fromJson(userSnapshot.data() as Map<String, dynamic>);
+
+      // Update the UI with the data from the Users model
+      contactNumber = user.contactNumber;
+      username = user.username;
+      email = user.email;
+      firstname = user.firstName;
+      lastname = user.lastName;
+      profilePictureUrl = user.profilePicture;
+      doguid = user.dogId;
+      pw = user.password;
 
       fetchDogData();
 
@@ -92,17 +98,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       DocumentSnapshot dogSnapshot =
           await FirebaseFirestore.instance.collection('dogs').doc(doguid).get();
 
+      // Use the Dog.fromJson method to create an instance of Dog from the JSON data
+      Dog dog = Dog.fromJson(dogSnapshot.data() as Map<String, dynamic>);
+
       // Extract the data from the document snapshot
-      dogname = dogSnapshot['name'];
-      dogProfilePictureUrl = dogSnapshot['profilepicture'];
+      dogname = dog.name;
+      dogProfilePictureUrl = dog.profilePicture;
 
       setState(() {
         isDogDataLoaded = true;
+        print(isDogDataLoaded);
       });
 
       // Update the UI with the contact number
     } catch (e) {
-      print('Error fetching user data: $e');
+      print('Error fetching dog data: $e');
     }
   }
 
@@ -363,48 +373,93 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(
                 height: 30,
               ),
+              // Stack(
+              //   children: [
+              //     image != null
+              //         ? CircleAvatar(
+              //             radius: 65,
+              //             backgroundImage: MemoryImage(image!),
+              //           )
+              //         : profilePictureUrl.isNotEmpty
+              //             ? CircleAvatar(
+              //                 radius: 65,
+              //                 backgroundImage: NetworkImage(profilePictureUrl),
+              //               )
+              //             : const CircleAvatar(
+              //                 radius: 65,
+              //                 backgroundImage: NetworkImage(
+              //                     'https://t4.ftcdn.net/jpg/03/46/93/61/360_F_346936114_RaxE6OQogebgAWTalE1myseY1Hbb5qPM.jpg'),
+              //               ),
+              //     Positioned(
+              //       bottom: 10,
+              //       left: 90,
+              //       child: GestureDetector(
+              //         child: SizedBox(
+              //             width: 35,
+              //             height: 35,
+              //             child: ClipRRect(
+              //               borderRadius: BorderRadius.circular(100),
+              //               child: Container(
+              //                 color: const Color(0xff0F3E48),
+              //                 padding: const EdgeInsets.all(2),
+              //                 child: const Icon(
+              //                   Icons.mode_edit_outline_outlined,
+              //                   color: Colors.white,
+              //                 ),
+              //               ),
+              //             )),
+              //         onTap: () {
+              //           selectImage();
+              //         },
+              //       ),
+              //     )
+              //   ],
+              // ),
               Stack(
                 children: [
-                  image != null
-                      ? CircleAvatar(
-                          radius: 65,
-                          backgroundImage: MemoryImage(image!),
-                        )
-                      : profilePictureUrl.isNotEmpty
-                          ? CircleAvatar(
-                              radius: 65,
-                              backgroundImage: NetworkImage(profilePictureUrl),
-                            )
-                          : const CircleAvatar(
-                              radius: 65,
-                              backgroundImage: NetworkImage(
-                                  'https://t4.ftcdn.net/jpg/03/46/93/61/360_F_346936114_RaxE6OQogebgAWTalE1myseY1Hbb5qPM.jpg'),
-                            ),
+                  if (image != null)
+                    CircleAvatar(
+                      radius: 65,
+                      backgroundImage: MemoryImage(image!),
+                    )
+                  else if (profilePictureUrl.isNotEmpty)
+                    CircleAvatar(
+                      radius: 65,
+                      backgroundImage: NetworkImage(profilePictureUrl),
+                    )
+                  else
+                    const CircleAvatar(
+                      radius: 65,
+                      backgroundImage: NetworkImage(
+                          'https://t4.ftcdn.net/jpg/03/46/93/61/360_F_346936114_RaxE6OQogebgAWTalE1myseY1Hbb5qPM.jpg'),
+                    ),
                   Positioned(
                     bottom: 10,
                     left: 90,
                     child: GestureDetector(
                       child: SizedBox(
-                          width: 35,
-                          height: 35,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Container(
-                              color: const Color(0xff0F3E48),
-                              padding: const EdgeInsets.all(2),
-                              child: const Icon(
-                                Icons.mode_edit_outline_outlined,
-                                color: Colors.white,
-                              ),
+                        width: 35,
+                        height: 35,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            color: const Color(0xff0F3E48),
+                            padding: const EdgeInsets.all(2),
+                            child: const Icon(
+                              Icons.mode_edit_outline_outlined,
+                              color: Colors.white,
                             ),
-                          )),
+                          ),
+                        ),
+                      ),
                       onTap: () {
                         selectImage();
                       },
                     ),
-                  )
+                  ),
                 ],
               ),
+
               Text(
                 username.isNotEmpty ? username : 'Username',
                 style:
